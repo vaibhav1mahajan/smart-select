@@ -1,64 +1,56 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
-
 }
 
-model User{
+model User {
   id      Int     @id @default(autoincrement())
   address String  @unique
   name    String?
   task    Task[]
 }
 
-
-model Worker{
-  id               Int     @id  @default(autoincrement())
-  address          String  @unique
-  submission       Submission[]
-  pending_amount   Int
-  locked_amount    Int
+model Worker {
+  id             Int          @id @default(autoincrement())
+  address        String       @unique
+  pending_amount Int
+  locked_amount  Int
+  submission     Submission[]
 }
 
-
-model Task{
-  id           Int    @id   @default(autoincrement())
-  title        String 
-  options      Option[]
-  user_id      Int
-  user         User  @relation(fields: [user_id],references: [id])
-  submissions  Submission[]
-  signature    String
-  amount       String
+model Task {
+  id          Int          @id @default(autoincrement())
+  title       String
+  user_id     Int
+  signature   String
+  amount      String
+  done        Boolean      @default(false)
+  options     Option[]
+  submissions Submission[]
+  user        User         @relation(fields: [user_id], references: [id])
 }
 
-model Option{
-  id          Int  @id  @default(autoincrement())
-  image_url   String 
-  option_id   Int
-  task_id     Int
-  task        Task @relation(fields: [task_id], references: [id])
-  submission  Submission[]
+model Option {
+  id         Int          @id @default(autoincrement())
+  image_url  String
+  task_id    Int
+  task       Task         @relation(fields: [task_id], references: [id])
+  submission Submission[]
 }
 
-model Submission{
-  id          Int     @id @default(autoincrement())
-  option_id   Int
-  option      Option  @relation(fields: [option_id],references: [id])
-  worker_id   Int
-  worker      Worker  @relation(fields: [worker_id],references: [id])
-  task_id     Int
-  task        Task    @relation(fields: [task_id],references: [id])
-  amouont     String
+model Submission {
+  id        Int    @id @default(autoincrement())
+  option_id Int
+  worker_id Int
+  task_id   Int
+  amouont   String
+  option    Option @relation(fields: [option_id], references: [id])
+  task      Task   @relation(fields: [task_id], references: [id])
+  worker    Worker @relation(fields: [worker_id], references: [id])
+  @@unique([worker_id,task_id])
 }
